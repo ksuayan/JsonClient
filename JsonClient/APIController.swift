@@ -20,24 +20,31 @@ class APIController: NSObject {
     func GetAPIResultsAsync(urlString:String) {
         
         //The Url that will be called
-        var url = NSURL.URLWithString(urlString)
+        var url = NSURL.URLWithString(urlString.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding))
         
         //Create a request
         var request: NSURLRequest = NSURLRequest(URL: url)
+        
+        println("url >>>> "+url.path)
         
         //Create a queue to hold the call
         var queue: NSOperationQueue = NSOperationQueue()
         
         // Sending Asynchronous request using NSURLConnection
         NSURLConnection.sendAsynchronousRequest(request, queue: queue,
-            completionHandler:{(response:NSURLResponse!, responseData:NSData!, error: NSError!) ->Void in
+            completionHandler:{
+                
+            (response:NSURLResponse!, responseData:NSData!, error: NSError!) ->Void in
+                
             var error: AutoreleasingUnsafePointer<NSError?> = nil
                 
             // Serialize the JSON result into a dictionary
-            let jsonResult: NSDictionary! = NSJSONSerialization.JSONObjectWithData(responseData, options:NSJSONReadingOptions.MutableContainers, error: error) as? NSDictionary
-            
+            let jsonResult: NSDictionary! = NSJSONSerialization.JSONObjectWithData(responseData,
+                options:NSJSONReadingOptions.MutableContainers,
+                error: error) as? NSDictionary
+                
             // If there is a result add the data into an array
-            if jsonResult.count>0 && jsonResult["result"].count > 0 {
+            if jsonResult.count>0 && jsonResult["result"].count>0  {
                 
                 var results: NSArray = jsonResult["result"] as NSArray
                 //Use the completion handler to pass the results

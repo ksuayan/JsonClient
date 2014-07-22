@@ -8,8 +8,9 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, APIControllerProtocol {
-                            
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate,
+APIControllerProtocol {
+    @IBOutlet var searchTerm: UISearchBar
     @IBOutlet var appTableView: UITableView
     
     var searchResultsData: NSArray = []
@@ -20,6 +21,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             self.searchResultsData = results
             self.appTableView.reloadData()
         })
+    }
+    
+    func searchBarTextDidEndEditing(searchBar: UISearchBar!) {
+        println("textDidEndEditing")
+        getRequest(searchBar.text)
+    }
+    
+    func searchBarSearchButtonClicked(searchBar: UISearchBar!) {
+        println("button clicked...")
+        getRequest(searchBar.text)
     }
     
     func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int {
@@ -35,21 +46,25 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         var cellData: NSDictionary = self.searchResultsData[indexPath.row] as NSDictionary
         
         //Assign and display the Title field
-        cell.textLabel.text = cellData["Name"] as String
-        cell.detailTextLabel.text = cellData["Artist"] as String
+        cell.textLabel.text = cellData["Name"] as String?
+        cell.detailTextLabel.text = cellData["Artist"] as String?
         
         return cell
     }
     
-    override func viewDidLoad() {
-        //Construct the API URL that you want to call
-        var term: String = "summer"
+    func getRequest(term: String) {
         var APIBaseUrl: String = "http://node.suayan.com/search/"
         var urlString:String = "\(APIBaseUrl)"+"\(term)"
-        
+        if !term.isEmpty {
+            api.GetAPIResultsAsync(urlString);
+        }
+
+    }
+    
+    override func viewDidLoad() {
         //Call the API by using the delegate and passing the API url
         self.api.delegate = self
-        api.GetAPIResultsAsync(urlString)
+        getRequest("summer");
         super.viewDidLoad()
     }
 
@@ -57,7 +72,6 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
 
 }
 
